@@ -1,0 +1,161 @@
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
+import org.telegram.telegrambots.exceptions.TelegramApiException;
+import org.telegram.telegrambots.ApiContextInitializer;
+import org.telegram.telegrambots.TelegramBotsApi;
+import org.telegram.telegrambots.api.methods.send.SendMessage;
+import org.telegram.telegrambots.api.objects.Message;
+import org.telegram.telegrambots.api.objects.Update;
+import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import java.io.IOException;
+
+import org.jsoup.nodes.Element;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+public class steam extends TelegramLongPollingBot {
+    int[] oldF = new int[13];
+
+    public static void main(String[] args) {
+        ApiContextInitializer.init();
+        TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
+        try {
+            telegramBotsApi.registerBot(new steam());
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public String getBotUsername() {
+        return "название";
+    }
+
+    @Override
+    public String getBotToken() {
+        return "тут токен бота";
+    }
+
+    @Override
+    public void onUpdateReceived(Update update) {
+        Message message = update.getMessage();
+        int[] nowF = new int[13];
+        int plus = 0;
+        if (message != null && message.hasText()) {
+            if (message.getText().equals("Scan")) {
+                String[] AccP = {
+                        "fgjhfgj:gfdsh",
+                        "trg35:4634",
+                        "erfhgfh:gdy5",
+                        "fgjhfgj:ydfy4",
+                        "trg35:t6y",
+                        "erfhgfh:gdy5",
+                        "fgjhfgj:gfdsh",
+                        "trg35:4634",
+                        "erfhgfh:gdy5",
+                        "fgjhfgj:ydfy4",
+                        "trg35:t6y",
+                        "erfhgfh:gdy5",
+                        "erfhgfh:gdy5"
+
+                };
+                String[] Acc = {
+                        "https://steamcommunity.com/profiles/ссылка на аккаунт/",
+                        "https://steamcommunity.com/profiles/ссылка на аккаунт",
+                        "https://steamcommunity.com/id/ссылка на аккаунт",
+                        "https://steamcommunity.com/id/ссылка на аккаунт",
+                        "https://steamcommunity.com/profiles/ссылка на аккаунт",
+                        "https://steamcommunity.com/profiles/ссылка на аккаунт",
+                        "https://steamcommunity.com/profiles/ссылка на аккаунт",
+                        "https://steamcommunity.com/profiles/ссылка на аккаунт",
+                        "https://steamcommunity.com/profiles/ссылка на аккаунт",
+                        "https://steamcommunity.com/profiles/ссылка на аккаунт",
+                        "https://steamcommunity.com/profiles/ссылка на аккаунт",
+                        "https://steamcommunity.com/profiles/ссылка на аккаунт",
+                        "https://steamcommunity.com/profiles/ссылка на аккаунт"
+                };
+                String a=" ";
+                for(int i = 0;i<Acc.length;i++) {
+                    String AccPS=AccP[i];
+                    System.out.println(AccPS);
+                    Document page = null;
+                    try {
+                        page = Jsoup.parse(new URL(Acc[i]), 3000);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    Element tableWth = page.select("div[class=profile_friend_links profile_count_link_preview_ctn responsive_groupfriends_element]").first();
+                    String frends = tableWth.select("span[class=profile_count_link_total]").text();
+                    nowF[i] = Integer.parseInt(frends);
+                    if(oldF[i]<nowF[i]){
+                      plus = nowF[i] - oldF[i];
+                   }
+                   else{
+                        plus = 0;
+                    }
+
+if(plus>0){
+                    a += i+1 + ". "+ frends + " (+"+plus+") " + "\uD83D\uDC47" +AccPS+ "\n";
+
+                    }
+                    if(plus==0){
+                        a += i+1 + ". "+ frends + "\n";
+                    }
+                        oldF[i] = nowF[i];
+                }
+                sendMsg(message, a);
+
+            }
+            else
+                sendMsg(message, "Я не знаю что ответить на это");
+        }
+    }
+
+    private void sendMsg(Message message, String text) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.enableMarkdown(true);
+        sendMessage.setChatId(message.getChatId().toString());
+        sendMessage.setReplyToMessageId(message.getMessageId());
+        sendMessage.setText(text);
+        try {
+            setButtons(sendMessage);
+            sendMessage(sendMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+    public void setButtons(SendMessage sendMessage){
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        sendMessage.setReplyMarkup(replyKeyboardMarkup);
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(false);
+        List<KeyboardRow> keyboardRowList = new ArrayList<>();
+        KeyboardRow keyboardButtons = new KeyboardRow();
+        keyboardButtons.add(new KeyboardButton("Scan"));
+        keyboardRowList.add(keyboardButtons);
+        replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+
+    }
+
+}
+
+
+
+
+ОШИБКА ПРИ КОМПИЛЯЦИИ:
+org.telegram.telegrambots.exceptions.TelegramApiRequestException: Error sending message: [400] Bad Request: can't parse entities: Can't find end of the entity starting at byte offset 427
+	at org.telegram.telegrambots.api.methods.send.SendMessage.deserializeResponse(SendMessage.java:170)
+	at org.telegram.telegrambots.api.methods.send.SendMessage.deserializeResponse(SendMessage.java:24)
+	at org.telegram.telegrambots.bots.DefaultAbsSender.sendApiMethod(DefaultAbsSender.java:689)
+	at org.telegram.telegrambots.bots.AbsSender.sendMessage(AbsSender.java:64)
+	at steam.sendMsg(steam.java:126)
+	at steam.onUpdateReceived(steam.java:110)
+	at java.util.ArrayList.forEach(ArrayList.java:1249)
+	at org.telegram.telegrambots.generics.LongPollingBot.onUpdatesReceived(LongPollingBot.java:27)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$HandlerThread.run(DefaultBotSession.java:309)
